@@ -1,0 +1,17 @@
+# yt-stats configuration file
+# Place this file as .yt-stats.yaml in your home directory or current directory
+
+# YouTube Data API v3 key (required)
+# Get one at: https://console.cloud.google.com/apis/credentials
+apiKey: "your_youtube_api_key_here"
+
+# API server port (default: 8998)
+port: 8998
+
+# Log level: debug, info, warn, error (default: info)
+logLevel: "info"
+
+# Note: You can also use environment variables:
+# export YTSTATS_API_KEY="your_key"
+# export YTSTATS_PORT=8998
+# export YTSTATS_LOG_LEVEL="debug"
