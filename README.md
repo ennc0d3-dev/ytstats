@@ -1,23 +1,44 @@
-# YouTube Stats Terminal App
+# YouTube Stats
 
-A Go-based HTTP API service that fetches YouTube video statistics using the YouTube Data API v3. The project includes observability features with OpenTelemetry and Prometheus metrics.
+A comprehensive YouTube statistics platform featuring a Go-based HTTP API, professional CLI tool, and browser extension for real-time video stats.
 
 ## Features
 
+### 🖥️ CLI Tool (NEW!)
+- **Professional command-line interface** powered by Cobra + Viper
+- Multiple commands: `serve`, `get`, `version`
+- Configuration via files, environment variables, or flags
+- Multiple output formats: table, JSON, YAML
+- Beautiful formatted output with emojis and thousands separators
+
+### 🌐 API Service
 - 📊 Fetch YouTube video statistics (views, likes, comments, etc.)
-- 🔭 OpenTelemetry tracing with stdout exporter
 - 📈 Prometheus metrics endpoint
+- 🔭 OpenTelemetry tracing with stdout exporter
 - 📝 Structured logging with zerolog
+- 📄 **OpenAPI 3.0 specification** for API documentation
 - 🐳 Docker support for easy deployment
-- 🧪 Comprehensive test suite with 42%+ coverage
-- 🌐 **Chrome Extension**: Real-time stats overlay while watching YouTube videos
 
-## Project Vision
+### 🧪 Testing & Quality
+- Comprehensive test suite with 42.3% coverage
+- Unit + Integration tests
+- Race detector enabled
+- GitHub Actions CI/CD pipeline
+- Security scanning (Gosec + CodeQL)
+- Automated dependency updates
 
-This project has two main components:
+### 🌟 Chrome Extension
+- Real-time stats overlay while watching YouTube videos
+- Modern glassmorphism UI
+- Auto-refresh with configurable intervals
+- Customizable settings (API endpoint, refresh rate)
 
-1. **API Service**: Go-based HTTP API that fetches YouTube statistics
-2. **Chrome Extension**: Browser extension that displays video stats as an overlay while you watch
+## Project Components
+
+1. **CLI Tool**: Multi-command interface with flexible configuration
+2. **API Service**: RESTful API for fetching YouTube statistics
+3. **Chrome Extension**: Browser extension for in-video stats overlay
+4. **CI/CD Pipeline**: Production-ready automated testing and deployment
 
 ## Prerequisites
 
@@ -66,7 +87,109 @@ export YTSTATS_API_KEY=your_youtube_api_key
 2. Build and run:
 ```bash
 go build -o yt-stats ./cmd/yt-stats
-./yt-stats
+./yt-stats serve  # Start API server
+```
+
+## CLI Usage
+
+The CLI tool provides multiple commands for different use cases.
+
+### Start API Server
+
+```bash
+# Start server (default port 8998)
+yt-stats serve
+
+# Custom port
+yt-stats serve --port 9000
+
+# Custom log level
+yt-stats serve --log-level debug
+
+# Using config file
+yt-stats serve --config ~/.yt-stats.yaml
+```
+
+### Get Video Statistics
+
+```bash
+# Get stats with default table output
+yt-stats get dQw4w9WgXcQ
+
+# JSON output
+yt-stats get dQw4w9WgXcQ --format json
+
+# YAML output
+yt-stats get dQw4w9WgXcQ --format yaml
+
+# Custom fields
+yt-stats get dQw4w9WgXcQ --fields views,likes
+
+# All fields
+yt-stats get dQw4w9WgXcQ --fields views,likes,comments,favorites
+```
+
+**Example output (table format):**
+```
+╔═══════════════════════════════════════════════════════════╗
+║ YouTube Video Statistics                                  ║
+╠═══════════════════════════════════════════════════════════╣
+║ Title: Rick Astley - Never Gonna Give You Up             ║
+╠═══════════════════════════════════════════════════════════╣
+║ 👁️  Views:     1,234,567,890                             ║
+║ 👍 Likes:     12,345,678                                 ║
+║ 💬 Comments:  123,456                                    ║
+╚═══════════════════════════════════════════════════════════╝
+```
+
+### Configuration
+
+The CLI supports multiple configuration methods (in order of precedence):
+
+1. **Command-line flags** (highest priority)
+2. **Environment variables** (YTSTATS_*)
+3. **Configuration file** (.yt-stats.yaml)
+4. **Defaults** (lowest priority)
+
+**Create a configuration file:**
+```bash
+cp .yt-stats.yaml.example ~/.yt-stats.yaml
+# Edit with your settings
+```
+
+**Example .yt-stats.yaml:**
+```yaml
+apiKey: "your_youtube_api_key_here"
+port: 8998
+logLevel: "info"
+```
+
+**Environment variables:**
+```bash
+export YTSTATS_API_KEY="your_key"
+export YTSTATS_PORT=8998
+export YTSTATS_LOG_LEVEL="debug"
+```
+
+### Version Information
+
+```bash
+yt-stats version
+# Output:
+# yt-stats version 1.0.0
+#   commit: dev
+#   built:  unknown
+```
+
+### Help
+
+```bash
+# General help
+yt-stats --help
+
+# Command-specific help
+yt-stats serve --help
+yt-stats get --help
 ```
 
 ## API Endpoints
@@ -89,6 +212,77 @@ GET /metrics
 ```
 
 Returns Prometheus-formatted metrics for monitoring.
+
+## API Documentation
+
+### OpenAPI Specification
+
+The API is fully documented using **OpenAPI 3.0** specification.
+
+**Location**: [`openapi.yaml`](openapi.yaml)
+
+**Features:**
+- Complete endpoint documentation
+- Request/response schemas
+- Validation patterns
+- Example requests and responses
+- Ready for SDK generation
+
+**View the API docs:**
+```bash
+# Online with Swagger Editor
+# Visit: https://editor.swagger.io/
+# Paste contents of openapi.yaml
+
+# Generate client SDK
+npm install -g @openapitools/openapi-generator-cli
+openapi-generator-cli generate -i openapi.yaml -g python -o ./client
+
+# Serve interactive docs locally
+npx @stoplight/prism-cli mock openapi.yaml
+```
+
+**Documented Endpoints:**
+- `GET /stats?video_id={VIDEO_ID}` - Fetch video statistics
+- `GET /metrics` - Prometheus metrics
+
+## CI/CD Pipeline
+
+The project has a **production-ready CI/CD pipeline** with GitHub Actions.
+
+**Documentation**: See [`PIPELINE.md`](PIPELINE.md) for complete details.
+
+**Workflows:**
+1. **CI/CD Workflow** (`.github/workflows/ci.yml`)
+   - Lint (golangci-lint v6)
+   - Test (unit + integration with race detector)
+   - Build (binary artifacts)
+   - Security (Gosec scanner)
+   - Docker (BuildKit with caching)
+
+2. **Build Workflow** (`.github/workflows/go.yml`)
+   - Production deployment
+   - Docker Hub publishing
+   - Codecov integration
+
+3. **Security Workflow** (`.github/workflows/codeql.yml`)
+   - CodeQL analysis
+   - Weekly scans
+   - Go + JavaScript coverage
+
+**Pipeline Features:**
+- ✅ Parallel job execution
+- ✅ Smart caching (Go modules, Docker layers)
+- ✅ Security scanning (Gosec + CodeQL)
+- ✅ 42.3% test coverage
+- ✅ Race detector enabled
+- ✅ Automated dependency updates
+
+**Status Badges:**
+```markdown
+![CI/CD](https://github.com/ennc0d3-dev/ytstats/workflows/CI/CD/badge.svg)
+![CodeQL](https://github.com/ennc0d3-dev/ytstats/workflows/CodeQL/badge.svg)
+```
 
 ## Chrome Extension
 
@@ -492,28 +686,83 @@ The application is configured via environment variables:
 ```
 .
 ├── cmd/yt-stats/           # Application entry point
-│   └── main.go             # Main application
+│   ├── main.go             # Main CLI entry
+│   └── cmd/                # CLI commands (NEW!)
+│       ├── root.go         # Root command with viper config
+│       ├── serve.go        # API server command
+│       ├── get.go          # Stats fetcher command
+│       └── version.go      # Version command
 ├── internal/api/           # API handlers and server logic
 │   ├── server.go           # HTTP server setup
 │   ├── handler.go          # Request handlers
 │   ├── ytutil.go           # YouTube API integration
-│   ├── *_test.go           # Unit and integration tests
+│   ├── handler_test.go     # Handler unit tests
+│   ├── server_test.go      # Server route tests
+│   └── integration_test.go # Integration tests
 ├── chrome-extension/       # Chrome browser extension
-│   ├── manifest.json       # Extension configuration
+│   ├── manifest.json       # Extension configuration (Manifest V3)
 │   ├── js/                 # JavaScript files
 │   │   ├── content.js      # YouTube page overlay injector
 │   │   ├── background.js   # Service worker
 │   │   └── popup.js        # Settings UI logic
 │   ├── css/                # Styling
-│   │   └── overlay.css     # Stats overlay styles
+│   │   └── overlay.css     # Stats overlay styles (glassmorphism)
 │   ├── popup.html          # Settings page
 │   └── README.md           # Extension documentation
-├── Dockerfile              # Docker build configuration
+├── .github/workflows/      # GitHub Actions CI/CD
+│   ├── ci.yml              # Comprehensive CI pipeline (NEW!)
+│   ├── go.yml              # Build and deployment
+│   └── codeql.yml          # Security scanning
+├── openapi.yaml            # OpenAPI 3.0 specification (NEW!)
+├── PIPELINE.md             # CI/CD documentation (NEW!)
+├── .yt-stats.yaml.example  # Config file example (NEW!)
+├── Dockerfile              # Multi-stage Docker build
 ├── docker-compose.yml      # Docker Compose setup
 ├── Makefile                # Development tasks
 ├── test.sh                 # Test runner script
 └── README.md               # This file
 ```
+
+## Quick Reference
+
+### Common Commands
+
+```bash
+# CLI Tool
+yt-stats serve                      # Start API server
+yt-stats get VIDEO_ID               # Get stats (table)
+yt-stats get VIDEO_ID -f json       # Get stats (JSON)
+yt-stats version                    # Show version
+
+# API Server
+curl "http://localhost:8998/stats?video_id=VIDEO_ID"
+curl http://localhost:8998/metrics
+
+# Development
+make build                          # Build binary
+make test                           # Run all tests with coverage
+make test-unit                      # Run unit tests only
+make docker-build                   # Build Docker image
+
+# Docker
+docker-compose up -d                # Start services
+docker-compose logs -f              # View logs
+docker-compose down                 # Stop services
+```
+
+### Configuration Priority
+
+1. Command-line flags (--api-key, --port)
+2. Environment variables (YTSTATS_API_KEY, YTSTATS_PORT)
+3. Config file (~/.yt-stats.yaml)
+4. Defaults
+
+### Project Links
+
+- **OpenAPI Spec**: [openapi.yaml](openapi.yaml)
+- **Pipeline Docs**: [PIPELINE.md](PIPELINE.md)
+- **Chrome Extension**: [chrome-extension/README.md](chrome-extension/README.md)
+- **GitHub Repository**: https://github.com/ennc0d3-dev/ytstats
 
 ## License
 
