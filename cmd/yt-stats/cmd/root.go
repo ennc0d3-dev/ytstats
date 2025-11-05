@@ -50,9 +50,15 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&logLevel, "log-level", "info", "log level (debug, info, warn, error)")
 
 	// Bind flags to viper
-	viper.BindPFlag("apiKey", rootCmd.PersistentFlags().Lookup("api-key"))
-	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
-	viper.BindPFlag("logLevel", rootCmd.PersistentFlags().Lookup("log-level"))
+	if err := viper.BindPFlag("apiKey", rootCmd.PersistentFlags().Lookup("api-key")); err != nil {
+		fmt.Fprintf(os.Stderr, "Error binding api-key flag: %v\n", err)
+	}
+	if err := viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port")); err != nil {
+		fmt.Fprintf(os.Stderr, "Error binding port flag: %v\n", err)
+	}
+	if err := viper.BindPFlag("logLevel", rootCmd.PersistentFlags().Lookup("log-level")); err != nil {
+		fmt.Fprintf(os.Stderr, "Error binding log-level flag: %v\n", err)
+	}
 }
 
 // initConfig reads in config file and ENV variables if set.
