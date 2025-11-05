@@ -1,6 +1,6 @@
 module github.com/ennc0d3/yt-stats
 
-go 1.21
+go 1.24
 
 require (
 	github.com/gorilla/mux v1.8.1
@@ -32,7 +32,6 @@ require (
 	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.46.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
