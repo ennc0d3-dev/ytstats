@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: YouTube Stats API
+  description: |
+    A REST API for fetching YouTube video statistics.
+    
+    This API provides endpoints to retrieve real-time statistics for YouTube videos
+    including view counts, likes, comments, and other engagement metrics.
+    
+    ## Authentication
+    Requires a YouTube Data API v3 key set via `YTSTATS_API_KEY` environment variable.
+    
+    ## Rate Limiting
+    Subject to YouTube Data API quotas (10,000 units/day by default).
+    
+  version: 1.0.0
+  contact:
+    name: GitHub Repository
+    url: https://github.com/ennc0d3/yt-stats
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8998
+    description: Local development server
+  - url: https://api.example.com
+    description: Production server (configure as needed)
+
+tags:
+  - name: statistics
+    description: Video statistics operations
+  - name: monitoring
+    description: Monitoring and observability
+
+paths:
+  /stats:
+    get:
+      tags:
+        - statistics
+      summary: Get video statistics
+      description: |
+        Retrieve statistics for a specific YouTube video by ID.
+        
+        Returns view count, like count, comment count, and favorite count
+        for the specified video.
+        
+      operationId: getVideoStats
+      parameters:
+        - name: video_id
+          in: query
+          description: YouTube video ID (from youtube.com/watch?v=VIDEO_ID)
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]{11}$'
+            example: "dQw4w9WgXcQ"
+          examples:
+            rickRoll:
+              value: "dQw4w9WgXcQ"
+              summary: Rick Astley - Never Gonna Give You Up
+            popular:
+              value: "9bZkp7q19f0"
+              summary: Gangnam Style
+      responses:
+        '200':
+          description: Successful response with video statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoStatistics'
+              examples:
+                success:
+                  value:
+                    viewCount: "1234567890"
+                    likeCount: "12345678"
+                    commentCount: "123456"
+                    favoriteCount: "0"
+        '400':
+          description: Bad request - missing or invalid video_id
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: "video_id parameter is missing"
+        '500':
+          description: Internal server error - failed to fetch stats
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: "failed to retrieve video statistics"
+              
+  /metrics:
+    get:
+      tags:
+        - monitoring
+      summary: Get Prometheus metrics
+      description: |
+        Returns Prometheus-formatted metrics for monitoring and observability.
+        
+        Includes:
+        - HTTP request metrics
+        - OpenTelemetry metrics
+        - Custom application metrics (video views counter)
+        
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Prometheus metrics in text format
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |
+                # HELP utube_video_views Total number of video views
+                # TYPE utube_video_views counter
+                utube_video_views 42.0
+                
+                # HELP http_requests_total Total HTTP requests
+                # TYPE http_requests_total counter
+                http_requests_total{method="GET",path="/stats"} 100
+
+components:
+  schemas:
+    VideoStatistics:
+      type: object
+      description: YouTube video statistics
+      required:
+        - viewCount
+        - likeCount
+        - commentCount
+        - favoriteCount
+      properties:
+        viewCount:
+          type: string
+          description: Total number of views
+          example: "1234567890"
+        likeCount:
+          type: string
+          description: Total number of likes
+          example: "12345678"
+        commentCount:
+          type: string
+          description: Total number of comments (may be disabled)
+          example: "123456"
+        favoriteCount:
+          type: string
+          description: Number of users who favorited (always 0 - deprecated by YouTube)
+          example: "0"
+          
+  parameters:
+    VideoId:
+      name: video_id
+      in: query
+      description: YouTube video ID
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-zA-Z0-9_-]{11}$'
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        text/plain:
+          schema:
+            type: string
+    InternalError:
+      description: Internal server error
+      content:
+        text/plain:
+          schema:
+            type: string
+
+security: []
+
+externalDocs:
+  description: YouTube Data API v3 Documentation
+  url: https://developers.google.com/youtube/v3/docs
