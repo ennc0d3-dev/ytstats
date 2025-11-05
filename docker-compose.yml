@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  yt-stats:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yt-stats-app
+    ports:
+      - "8998:8998"
+    environment:
+      - YTSTATS_API_KEY=${YTSTATS_API_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8998/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
